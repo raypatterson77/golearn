@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"testing"
 	"time"
 )
 
@@ -14,6 +15,21 @@ type Store interface {
 type SpyStore struct {
 	response  string
 	cancelled bool
+	t         *testing.T
+}
+
+func (s *SpyStore) assertWasCancelled() {
+	s.t.Helper()
+	if !s.cancelled {
+		s.t.Error("store was not told to cancel")
+	}
+}
+
+func (s *SpyStore) assertWasNotCancelled() {
+	s.t.Helper()
+	if s.cancelled {
+		s.t.Error("store was told to cancel")
+	}
 }
 
 func (s *SpyStore) Fetch() string {

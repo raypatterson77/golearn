@@ -20,7 +20,7 @@ func TestServer(t *testing.T) {
 
 	t.Run("tells store to cancel work if request is cancelled", func(t *testing.T) {
 		data := "hello, world"
-		store := &SpyStore{response: data}
+		store := &SpyStore{response: data, t: t}
 		svr := Server(store)
 
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -36,10 +36,11 @@ func TestServer(t *testing.T) {
 		if !store.cancelled {
 			t.Error("store was not told to cancel")
 		}
+		store.assertWasCancelled()
 	})
 	t.Run("returns data from store", func(t *testing.T) {
 		data := "hello, olli"
-		store := &SpyStore{response: data}
+		store := &SpyStore{response: data, t: t}
 		svr := Server(store)
 
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -54,5 +55,10 @@ func TestServer(t *testing.T) {
 		if store.cancelled {
 			t.Errorf("it should not have cancelled the store")
 		}
+
+		store.assertWasNotCancelled()
 	})
 }
+
+//learn-go-with-tests/testing-fundamentals/intro-to-acceptance-tests
+// https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/context#refactor
